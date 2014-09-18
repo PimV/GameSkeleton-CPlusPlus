@@ -17,7 +17,7 @@ void gameLoop() {
 	double OPTIMAL_TIME = 1000 / TARGET_FPS;
 
 	LARGE_INTEGER frequency;        // ticks per second
-	LARGE_INTEGER previousTime, currentTime;           // ticks
+	LARGE_INTEGER previousTime, currentTime, afterLoopTime;           // ticks
 	QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&previousTime);
 
@@ -28,21 +28,23 @@ void gameLoop() {
 
 	while (true) {
 		QueryPerformanceCounter(&currentTime);
-		double updateLength = (currentTime.QuadPart - previousTime.QuadPart) * 1000.0 / frequency.QuadPart;
+		long updateLength = (currentTime.QuadPart - previousTime.QuadPart) * 1000.0 / frequency.QuadPart;
 		previousTime = currentTime;
 		double delta = updateLength / OPTIMAL_TIME;
 
-		lastFpsTime += updateLength * 1000.0;
+		//Not sure if correct, but seems to work
+		lastFpsTime += updateLength * 10.0;
 		fps++;
-
-		cout << lastFpsTime << "\n";
 
 		if (lastFpsTime >= 1000) {
 			lastFpsTime = 0;
 			fps = 0;
 		}
 
-		//QueryPerformanceCounter(&previousTime);
+		QueryPerformanceCounter(&afterLoopTime);
+		if ((((previousTime.QuadPart - afterLoopTime.QuadPart) * 1000.0 / frequency.QuadPart) + OPTIMAL_TIME) > 0) {
+			Sleep((((previousTime.QuadPart - afterLoopTime.QuadPart) * 1000.0 / frequency.QuadPart) + OPTIMAL_TIME));
+		}
 	}
 }
 
